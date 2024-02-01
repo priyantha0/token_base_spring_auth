@@ -2,12 +2,15 @@ package com.clab.tbaseauth.controller;
 
 import com.clab.tbaseauth.model.RegistrationStatus;
 import com.clab.tbaseauth.model.dto.RegistrationRequestDTO;
+import com.clab.tbaseauth.model.dto.RegistrationResponseDTO;
+import com.clab.tbaseauth.service.AccountService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -16,18 +19,20 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 @WebMvcTest(AccountController.class)
 class AccountControllerTest {
 
   @Autowired private MockMvc mockMvc;
-
+  @MockBean private AccountService accountService;
   @Autowired private ObjectMapper objectMapper;
 
   private static final String WELCOME_ENDPOINT = "/api/accounts/welcome";
   private static final String REGISTER_ENDPOINT = "/api/accounts/register";
   private static RegistrationRequestDTO validRequestDTO;
   private static RegistrationRequestDTO invalidRequestDTO;
+  private static RegistrationResponseDTO validResponseDTO;
 
   @BeforeAll
   static void setup() {
@@ -35,6 +40,9 @@ class AccountControllerTest {
         new RegistrationRequestDTO("priyantha gunasekara", "priyantha.getc@gmail.com", "1q2w3e4r");
 
     invalidRequestDTO = new RegistrationRequestDTO(null, "invalid_email", null);
+    validResponseDTO =
+        new RegistrationResponseDTO(
+            RegistrationStatus.created, "sample-toke", "sample-refresh-token");
   }
 
   @Test
@@ -96,6 +104,9 @@ class AccountControllerTest {
   @Test
   @WithMockUser
   void register_should_return_valid_resp_with_status_created_for_valid_request() throws Exception {
+
+    when(accountService.register(validRequestDTO)).thenReturn(validResponseDTO);
+
     mockMvc
         .perform(
             post(REGISTER_ENDPOINT)
@@ -103,6 +114,8 @@ class AccountControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(validRequestDTO)))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.status", Matchers.is(RegistrationStatus.created)));
+        .andExpect(jsonPath("$.status", Matchers.is(RegistrationStatus.created)))
+        .andExpect(jsonPath("$.token", Matchers.not(Matchers.emptyOrNullString())))
+        .andExpect(jsonPath("$.refreshToken", Matchers.not(Matchers.emptyOrNullString())));
   }
 }

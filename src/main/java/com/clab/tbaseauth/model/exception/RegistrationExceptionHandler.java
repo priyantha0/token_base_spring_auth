@@ -7,11 +7,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class RegistrationExceptionHandler {
 
-    public record ErrorModel(String error) {}
+  public record ErrorModel(String error) {}
 
-
-    @ExceptionHandler
-    public ResponseEntity<ErrorModel> handle(RegistrationRequestInvalidException exception) {
-        return ResponseEntity.badRequest().body(new ErrorModel(exception.getMessage()));
-    }
+  @ExceptionHandler
+  public ResponseEntity<ErrorModel> handle(RegistrationRequestValidationException exception) {
+    return ResponseEntity.badRequest().body(new ErrorModel(exception.getMessage()));
+  }
 }
