@@ -17,7 +17,7 @@ public class RegistrationRequestInvalidException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return getMessages().toString();
+        return String.join(",", getMessages());
     }
 
     public List<String> getMessages() {

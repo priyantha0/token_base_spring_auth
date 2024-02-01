@@ -1,81 +1,108 @@
 package com.clab.tbaseauth.controller;
 
+import com.clab.tbaseauth.model.RegistrationStatus;
 import com.clab.tbaseauth.model.dto.RegistrationRequestDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 @WebMvcTest(AccountController.class)
 class AccountControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+  @Autowired private ObjectMapper objectMapper;
 
-    @Test
-    void context_loads() throws Exception {
-        assertThat(mockMvc).isNotNull();
-        assertThat(objectMapper).isNotNull();
+  private static final String WELCOME_ENDPOINT = "/api/accounts/welcome";
+  private static final String REGISTER_ENDPOINT = "/api/accounts/register";
+  private static RegistrationRequestDTO validRequestDTO;
+  private static RegistrationRequestDTO invalidRequestDTO;
 
-    }
+  @BeforeAll
+  static void setup() {
+    validRequestDTO =
+        new RegistrationRequestDTO("priyantha gunasekara", "priyantha.getc@gmail.com", "1q2w3e4r");
 
-    @Test
-    @WithMockUser
-    void welcome_should_return_welcome_with_status_ok_for_valid_user() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/account/welcome"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string("welcome"));
+    invalidRequestDTO = new RegistrationRequestDTO(null, "invalid_email", null);
+  }
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/account/welcome")
-                        .with(csrf()))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string("welcome"));
-    }
+  @Test
+  void context_loads() throws Exception {
+    assertThat(mockMvc).isNotNull();
+    assertThat(objectMapper).isNotNull();
+  }
 
-    @Test
-    void welcome_should_return_status_unauthorized_for_invalid_user() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/account/welcome"))
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
-    }
+  @Test
+  @WithMockUser
+  void welcome_should_return_welcome_with_status_ok_for_valid_user() throws Exception {
+    mockMvc
+        .perform(get(WELCOME_ENDPOINT))
+        .andExpect(status().isOk())
+        .andExpect(content().string("welcome"));
 
-    @Test
-    @WithMockUser
-    void register_should_return_status_bad_request_for_empty_request_body() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/account/register")
-                        .with(csrf()))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
-    }
+    mockMvc
+        .perform(post(WELCOME_ENDPOINT).with(csrf()))
+        .andExpect(status().isOk())
+        .andExpect(content().string("welcome"));
+  }
 
-    @Test
-    @WithMockUser
-    void register_should_return_errors_with_status_bad_request_for_invalid_body() throws Exception {
-        RegistrationRequestDTO invalidRequestDTO = new RegistrationRequestDTO(
-                null,
-                "invalid_email",
-                null
-        );
+  @Test
+  void welcome_should_return_status_unauthorized_for_invalid_user() throws Exception {
+    mockMvc.perform(get(WELCOME_ENDPOINT)).andExpect(status().isUnauthorized());
+  }
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/account/register")
-                    .with(csrf())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(invalidRequestDTO)))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(jsonPath("$.error").exists())
-                .andExpect(jsonPath("$.error").isString());
-    }
+  @Test
+  @WithMockUser
+  void register_should_return_status_bad_request_for_empty_request_body() throws Exception {
+    mockMvc.perform(post(REGISTER_ENDPOINT).with(csrf())).andExpect(status().isBadRequest());
+  }
 
+  @Test
+  @WithMockUser
+  void register_should_return_errors_with_status_bad_request_for_invalid_body() throws Exception {
+    mockMvc
+        .perform(
+            post(REGISTER_ENDPOINT)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidRequestDTO)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.error").exists())
+        .andExpect(jsonPath("$.error").isString());
+  }
 
+  @Test
+  void register_should_not_be_protected_or_blocked() throws Exception {
+    mockMvc
+        .perform(
+            post(REGISTER_ENDPOINT)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(objectMapper.writeValueAsString(validRequestDTO)))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  @WithMockUser
+  void register_should_return_valid_resp_with_status_created_for_valid_request() throws Exception {
+    mockMvc
+        .perform(
+            post(REGISTER_ENDPOINT)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(validRequestDTO)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.status", Matchers.is(RegistrationStatus.created)));
+  }
 }
