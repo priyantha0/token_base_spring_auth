@@ -1,6 +1,5 @@
 package com.clab.tbaseauth.controller;
 
-import com.clab.tbaseauth.model.RegistrationStatus;
 import com.clab.tbaseauth.model.dto.RegistrationRequestDTO;
 import com.clab.tbaseauth.model.dto.RegistrationResponseDTO;
 import com.clab.tbaseauth.model.exception.RegistrationRequestValidationException;

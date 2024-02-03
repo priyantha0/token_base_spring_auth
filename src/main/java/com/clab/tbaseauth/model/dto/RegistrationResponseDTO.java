@@ -1,7 +1,5 @@
 package com.clab.tbaseauth.model.dto;
 
-import com.clab.tbaseauth.model.RegistrationStatus;
-
 import java.util.List;
 
 public record RegistrationResponseDTO(

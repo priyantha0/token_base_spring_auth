@@ -1,8 +1,8 @@
 package com.clab.tbaseauth.model;
 
 public interface RegistrationStatus {
-  String created = "CREATED";
-  String updated = "UPDATED";
-  String failed = "FAILED";
-  String notProcessed = "NOT_PROCESSED";
+  String CREATED = "created";
+  String UPDATED = "updated";
+  String FAILED = "failed";
+  String NOT_PROCESSED = "not_processed";
 }

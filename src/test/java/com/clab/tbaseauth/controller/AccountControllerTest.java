@@ -42,7 +42,7 @@ class AccountControllerTest {
     invalidRequestDTO = new RegistrationRequestDTO(null, "invalid_email", null);
     validResponseDTO =
         new RegistrationResponseDTO(
-            RegistrationStatus.created, "sample-toke", "sample-refresh-token");
+            RegistrationStatus.CREATED, "sample-toke", "sample-refresh-token");
   }
 
   @Test
@@ -114,7 +114,7 @@ class AccountControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(validRequestDTO)))
         .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.status", Matchers.is(RegistrationStatus.created)))
+        .andExpect(jsonPath("$.status", Matchers.is(RegistrationStatus.CREATED)))
         .andExpect(jsonPath("$.token", Matchers.not(Matchers.emptyOrNullString())))
         .andExpect(jsonPath("$.refreshToken", Matchers.not(Matchers.emptyOrNullString())));
   }

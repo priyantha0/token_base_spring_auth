@@ -21,7 +21,7 @@ import java.util.UUID;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-public class AccountServiceTest {
+class AccountServiceTest {
 
   @MockBean private UserRepository userRepository;
 
@@ -42,9 +42,9 @@ public class AccountServiceTest {
     RegistrationResponseDTO responseDTO = accountService.register(validRequestDTO);
     assertNotNull(responseDTO, "Response should not be null for a valid request");
     assertEquals(
-        RegistrationStatus.created,
+        RegistrationStatus.CREATED,
         responseDTO.status(),
-        "Response should have CREATED status for a valid request");
+        "Response should have created status for a valid request");
     assertInstanceOf(
         String.class,
         responseDTO.token(),

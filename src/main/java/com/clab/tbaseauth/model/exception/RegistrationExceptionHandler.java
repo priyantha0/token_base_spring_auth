@@ -26,6 +26,6 @@ public class RegistrationExceptionHandler {
 
   private ResponseEntity<RegistrationResponseDTO> badRequestResponse(List<String> errors) {
     return ResponseEntity.badRequest()
-        .body(new RegistrationResponseDTO(RegistrationStatus.failed, errors));
+        .body(new RegistrationResponseDTO(RegistrationStatus.FAILED, errors));
   }
 }

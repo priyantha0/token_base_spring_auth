@@ -24,7 +24,7 @@ public class AccountService {
     User userToSave = validRequestDTO.toEntity();
     userToSave.setId(UUID.randomUUID().toString());
     saveUser(userToSave);
-    return new RegistrationResponseDTO(RegistrationStatus.created, "ttt", "rtt");
+    return new RegistrationResponseDTO(RegistrationStatus.CREATED, "ttt", "rtt");
   }
 
   public User saveUser(User user) {
