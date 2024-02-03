@@ -86,8 +86,8 @@ class AccountControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidRequestDTO)))
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.error").exists())
-        .andExpect(jsonPath("$.error").isString());
+        .andExpect(jsonPath("$.errors").exists())
+        .andExpect(jsonPath("$.errors").isArray());
   }
 
   @Test
